@@ -7,7 +7,7 @@ namespace Interview.ZsFund.Core.Utils;
 
 public static partial class ExcelHelper
 {
-    [GeneratedRegex(@"^(.*)?\((\d+)\)$")]
+    [GeneratedRegex(@"^(?<name>[^\(\)]+)(\((?<number>\d+)\))?$")]
     private static partial Regex MyRegex();
 
     public static List<MarketEntity> ReadMarketData(Stream stream)
@@ -27,8 +27,8 @@ public static partial class ExcelHelper
                 continue;
             }
 
-            var name = match[0].Groups[1].Value;
-            _ = TryParse(match[0].Groups[2].Value, out var serialNumber);
+            var name = match[0].Groups["name"].Value;
+            _ = TryParse(match[0].Groups["number"].Value, out var serialNumber);
 
             MarketEntity entity;
 
@@ -64,7 +64,7 @@ public static partial class ExcelHelper
                 if (cell is not null && entityDict.TryGetValue(cell.ColumnIndex, out var entity))
                 {
                     var price = (decimal)cell.NumericCellValue;
-                    entity.Data.Add(new MarketData(date, price));
+                    entity.MarketData.Add(new MarketDataItem(date, price));
                 }
             }
         }
@@ -72,7 +72,7 @@ public static partial class ExcelHelper
         // 排序整理
         foreach (var entity in result)
         {
-            entity.Data = entity.Data.OrderBy(x => x.Date).ToList();
+            entity.MarketData = entity.MarketData.OrderBy(x => x.Date).ToList();
         }
 
         return result.OrderBy(e => e.SerialNumber).ToList();
