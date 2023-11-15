@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interview.ZsFund.ConsoleApp", "Interview.ZsFund.ConsoleApp\Interview.ZsFund.ConsoleApp.csproj", "{24A805AA-DC89-424E-AAC7-5C18861BB097}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFolder", "SolutionFolder", "{C997AF83-7344-41E8-B388-76DB168DBCA4}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.gitignore = .gitignore
+		global.json = global.json
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interview.ZsFund.Core", "Interview.ZsFund.Core\Interview.ZsFund.Core.csproj", "{66504608-4AE4-407D-B0A2-B8EA2307E72C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{24A805AA-DC89-424E-AAC7-5C18861BB097}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24A805AA-DC89-424E-AAC7-5C18861BB097}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24A805AA-DC89-424E-AAC7-5C18861BB097}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24A805AA-DC89-424E-AAC7-5C18861BB097}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66504608-4AE4-407D-B0A2-B8EA2307E72C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66504608-4AE4-407D-B0A2-B8EA2307E72C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66504608-4AE4-407D-B0A2-B8EA2307E72C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66504608-4AE4-407D-B0A2-B8EA2307E72C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
