@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Models\" />
+      <PackageReference Include="NPOI" Version="2.6.2" />
     </ItemGroup>
 
 </Project>
