@@ -1,7 +1,10 @@
-import { Select } from 'antd';
+import { Button, DatePicker, Select } from 'antd';
 import axios from 'axios';
+import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import './App.css';
+
+const { RangePicker } = DatePicker;
 
 type MarketDataItem = {
   date: Date;
@@ -58,7 +61,27 @@ function App() {
   // 简单展示选中的项
   const selectedStocksForA = stocks.filter(stock => selectedForA.includes(stock.serialNumber));
   const selectedStockForB = stocks.find(stock => stock.serialNumber === selectedForB);
-  
+
+  // 选择时间
+  const [ dates, setDates ] = useState<Date[]>([new Date('2019-01-01'), new Date('2019-12-31')]);
+
+  const [ relativeReturns, setRelativeReturns ] = useState<RelativeReturn[]>([]);
+  useEffect(() => {
+    if (!selectedForA.length || selectedForB === null || dates.length !== 2) {
+      return;
+    }
+
+    axios.post<RelativeReturn[]>(`${baseUrl}/MarketEntity/relative-return`, {
+      serialNumbers: selectedForA,
+      baseSerialNumber: selectedForB,
+      startDate: dates[0],
+      endDate: dates[1],
+    }).then(resp => {
+      console.log(resp);
+      setRelativeReturns(resp.data);
+    })
+  }, [ selectedForA, selectedForB, dates ]);
+
   return (
     <div className='App'>
       <div>
@@ -92,6 +115,14 @@ function App() {
 
         <h3>Selected for B:</h3>
         <p>{selectedStockForB ? `${selectedStockForB.name} (${selectedStockForB.serialNumber})` : 'None'}</p>
+      </div>
+      {/*选择时间*/}
+      <div>
+        <RangePicker allowClear
+                     defaultValue={[ dayjs('2019-01-01'), dayjs('2019-12-31') ]}
+                     onChange={(dates) => {
+                       dates && dates[0] && dates[1] && setDates([ dates[0].toDate(), dates[1].toDate() ]);
+                     }}/>
       </div>
     </div>
   );
