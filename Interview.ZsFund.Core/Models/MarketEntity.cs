@@ -21,6 +21,10 @@ public abstract class MarketEntity
         var predicate = new Func<DateTime, bool>(e => e >= startDate && e <= endDate);
         var dataA = MarketData.Where(e => predicate(e.Date)).OrderBy(e => e.Date).ToList();
         var dataB = baseEntity.MarketData.Where(e => predicate(e.Date)).OrderBy(e => e.Date).ToList();
+        if(dataA.Count == 0 || dataB.Count == 0)
+        {
+            return new RelativeReturn(SerialNumber, baseEntity.SerialNumber, startDate, endDate, new List<RelativeReturnItem>());
+        }
 
         var result = new List<RelativeReturnItem>();
         int indexA = 0, indexB = 0;

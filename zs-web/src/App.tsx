@@ -1,70 +1,63 @@
-import { Button, DatePicker, Select } from 'antd';
+import { DatePicker, Select } from 'antd';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import ReactECharts from 'echarts-for-react';
 import React, { useEffect, useState } from 'react';
 import './App.css';
+import { MarketEntity, RelativeReturn, RelativeReturnItem } from './model';
 
 const { RangePicker } = DatePicker;
 
-type MarketDataItem = {
-  date: Date;
-  price: number;
-};
-
-type MarketEntity = {
-  serialNumber: number;
-  name: string;
-  marketData: MarketDataItem[];
-}
-
-type RelativeReturnItem = {
-  date: Date;
-  relativeReturn: number;
-}
-
-type RelativeReturn = {
-  entitySerialNumber: number;
-  baseEntitySerialNumber: number;
-  startDate: Date;
-  endDate: Date;
-  data: RelativeReturnItem[];
-}
-
 const baseUrl = "https://localhost:7148";
+
+const DEFAULT_OPTION = {
+  legend: {},
+  tooltip: {},
+  grid: { top: 8, right: 8, bottom: 24, left: 36 },
+  xAxis: { type: 'time', name: '时间' },
+  yAxis: {
+    type: 'value',
+    name: '相对收益',
+    scale: true,
+    axisTick: {
+      length: 6,
+    }
+  },
+}
 
 function App() {
   // 获取数据
-  const [ stocks, setStocks ] = useState<MarketEntity[]>([]);
+  const [ allStocks, setAllStocks ] = useState<MarketEntity[]>([]);
   useEffect(() => {
     axios.get<MarketEntity[]>(`${baseUrl}/MarketEntity`)
       .then(resp => {
-        console.log(resp)
-        setStocks(resp.data);
+        setAllStocks(resp.data);
       });
   }, []);
 
   // 设置下拉列表
   const [ selectedForA, setSelectedForA ] = useState<number[]>([]);
   const [ selectedForB, setSelectedForB ] = useState<number | null>(null);
-  const optionsForA = stocks.map(stock => ({
+  const optionsForA = allStocks.map(stock => ({
     label: stock.name,
     value: stock.serialNumber,
     disabled: selectedForB === stock.serialNumber // 禁用在B中已选的项
   }));
 
-  const optionsForB = stocks.map(stock => ({
+  const optionsForB = allStocks.map(stock => ({
     label: stock.name,
     value: stock.serialNumber,
     disabled: selectedForA.includes(stock.serialNumber) // 禁用在A中已选的所有项
   }));
 
   // 简单展示选中的项
-  const selectedStocksForA = stocks.filter(stock => selectedForA.includes(stock.serialNumber));
-  const selectedStockForB = stocks.find(stock => stock.serialNumber === selectedForB);
+  const selectedStocksForA = allStocks.filter(stock => selectedForA.includes(stock.serialNumber));
+  const selectedStockForB = allStocks.find(stock => stock.serialNumber === selectedForB);
 
   // 选择时间
-  const [ dates, setDates ] = useState<Date[]>([new Date('2019-01-01'), new Date('2019-12-31')]);
+  const [ dates, setDates ] = useState<Date[]>([ new Date('2019-03-01'), new Date('2019-05-31') ]);
 
+  // 获取相对收益
   const [ relativeReturns, setRelativeReturns ] = useState<RelativeReturn[]>([]);
   useEffect(() => {
     if (!selectedForA.length || selectedForB === null || dates.length !== 2) {
@@ -77,10 +70,70 @@ function App() {
       startDate: dates[0],
       endDate: dates[1],
     }).then(resp => {
-      console.log(resp);
       setRelativeReturns(resp.data);
     })
   }, [ selectedForA, selectedForB, dates ]);
+
+  const [ option, setOption ] = useState(DEFAULT_OPTION);
+  useEffect(() => {
+    if (relativeReturns.length === 0) {
+      return;
+    }
+
+    const stocks = relativeReturns.map(relativeReturn => allStocks.find(stock => stock.serialNumber === relativeReturn.entitySerialNumber));
+    const baseStock = allStocks.find(stock => stock.serialNumber === selectedForB);
+    console.log('stocks', relativeReturns, allStocks, stocks, baseStock)
+
+    const dimensions = [ 'date', ...stocks.map(stock => stock?.name) ];
+    const data: (RelativeReturnItem & { entitySerialNumber: number })[] = [];
+    relativeReturns.forEach(relativeReturn => {
+      relativeReturn.data.forEach(item => {
+        data.push({
+          entitySerialNumber: relativeReturn.entitySerialNumber,
+          date: item.date,
+          relativeReturn: item.relativeReturn,
+        });
+      });
+    });
+
+    const mergedData: { [key: string]: any }[] = [];
+    data.forEach(item => {
+      const date = item.date;
+      const name = stocks.find(stock => stock?.serialNumber === item.entitySerialNumber)?.name;
+      if (name) {
+        const mergedItem = mergedData.find(mergedItem => mergedItem.date === date);
+        if (mergedItem) {
+          mergedItem[name] = item.relativeReturn;
+        } else {
+          mergedData.push({
+            date,
+            [name]: item.relativeReturn,
+          });
+        }
+      }
+    });
+
+    const series = stocks.map(stock => ({
+      type: 'line',
+      name: stock?.name,
+      encode: {
+        x: 'date',
+        y: stock?.name,
+      }
+    }));
+
+    const newOption = {
+      ...option,
+      dataset: {
+        dimensions,
+        source: mergedData
+      },
+      series,
+    };
+    console.log(series, dimensions, mergedData)
+    setOption(newOption);
+
+  }, [ relativeReturns ]);
 
   return (
     <div className='App'>
@@ -119,10 +172,14 @@ function App() {
       {/*选择时间*/}
       <div>
         <RangePicker allowClear
-                     defaultValue={[ dayjs('2019-01-01'), dayjs('2019-12-31') ]}
+                     defaultValue={[ dayjs('2019-03-01'), dayjs('2019-05-31') ]}
                      onChange={(dates) => {
                        dates && dates[0] && dates[1] && setDates([ dates[0].toDate(), dates[1].toDate() ]);
                      }}/>
+      </div>
+      {/*展示图表*/}
+      <div>
+        <ReactECharts option={option}/>
       </div>
     </div>
   );
