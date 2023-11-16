@@ -7,26 +7,24 @@ namespace Interview.ZsFund.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class MarkEntityController : ControllerBase
+public class MarketEntityController : ControllerBase
 {
     private readonly MarketEntityService _service;
 
-    public MarkEntityController(MarketEntityService service)
+    public MarketEntityController(MarketEntityService service)
     {
         _service = service;
     }
 
     /// <summary>
-    ///     批量获取数据
+    ///     获取所有股票列表
     /// </summary>
-    /// <param name="serialNumbers"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    [HttpPost("entities")]
-    public IEnumerable<MarketEntity> GetMarketEntitiesAsync([FromBody] IEnumerable<int> serialNumbers,
-        CancellationToken cancellationToken)
+    [HttpGet]
+    public IEnumerable<MarketEntity> GetMarketEntitiesAsync(CancellationToken cancellationToken)
     {
-        return _service.GetMarketEntitiesAsync(serialNumbers, cancellationToken);
+        return _service.GetMarketEntitiesAsync(null, cancellationToken);
     }
 
     /// <summary>

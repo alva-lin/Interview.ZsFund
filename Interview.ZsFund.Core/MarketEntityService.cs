@@ -1,4 +1,5 @@
-﻿using Interview.ZsFund.Core.Models;
+﻿using System.Runtime.CompilerServices;
+using Interview.ZsFund.Core.Models;
 using Interview.ZsFund.Core.Utils;
 
 namespace Interview.ZsFund.Core;
@@ -22,10 +23,10 @@ public class MarketEntityService
     /// <param name="serialNumbers">股票编号</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public List<MarketEntity> GetMarketEntitiesAsync(IEnumerable<int> serialNumbers,
+    public List<MarketEntity> GetMarketEntitiesAsync(IEnumerable<int>? serialNumbers,
         CancellationToken cancellationToken)
     {
-        return data.Where(e => serialNumbers.Contains(e.SerialNumber)).ToList();
+        return serialNumbers == null ? data.ToList() : data.Where(e => serialNumbers.Contains(e.SerialNumber)).ToList();
     }
 
     /// <summary>
