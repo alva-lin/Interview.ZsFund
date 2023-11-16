@@ -5,14 +5,11 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["Interview.ZsFund.Api/Interview.ZsFund.Api.csproj", "Interview.ZsFund.Api/"]
-RUN dotnet restore "Interview.ZsFund.Api/Interview.ZsFund.Api.csproj"
-COPY . .
-WORKDIR "/src/Interview.ZsFund.Api"
-RUN dotnet build "Interview.ZsFund.Api.csproj" -c Release -o /app/build
+COPY [".", "."]
+RUN dotnet restore "Interview.ZsFund.Api/Interview.ZsFund.Api.csproj" /ignoreprojectextensions:.dcproj
 
 FROM build AS publish
-RUN dotnet publish "Interview.ZsFund.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Interview.ZsFund.Api/Interview.ZsFund.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
