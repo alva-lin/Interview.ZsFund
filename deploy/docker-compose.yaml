@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "41000:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
+  api:
+    build:
+      context: ..
+      dockerfile: Interview.ZsFund.Api/Dockerfile
+
+  web:
+    build:
+      context: ../zs-web
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=api

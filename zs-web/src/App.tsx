@@ -8,7 +8,7 @@ import { MarketEntity, RelativeReturn, RelativeReturnItem } from './model';
 
 const { RangePicker } = DatePicker;
 
-const baseUrl = process.env.REACT_APP_API_PATH;
+const baseUrl = process.env.REACT_APP_API_URL;
 
 const DEFAULT_OPTION = {
   legend: {},

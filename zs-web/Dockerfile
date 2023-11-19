@@ -1,8 +1,10 @@
-﻿# Stage 1: Build Angular application
+# Stage 1: Build Angular application
 FROM node:18 AS builder
 
 ARG ENVIRONMENT=production
 ARG NPM_REGISTRY=https://registry.npmjs.org/
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL ${REACT_APP_API_URL}
 
 WORKDIR /app
 
@@ -28,7 +30,7 @@ FROM nginx:alpine
 COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy the static files from the builder stage to the NGINX public directory
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/build /usr/share/nginx/html
 
 # Expose port 80 (default NGINX port)
 EXPOSE 80

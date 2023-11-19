@@ -8,6 +8,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFolder", "SolutionF
 		.gitignore = .gitignore
 		global.json = global.json
 		README.md = README.md
+		deploy\docker-compose.yaml = deploy\docker-compose.yaml
+		deploy\nginx.conf = deploy\nginx.conf
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interview.ZsFund.Core", "Interview.ZsFund.Core\Interview.ZsFund.Core.csproj", "{66504608-4AE4-407D-B0A2-B8EA2307E72C}"
