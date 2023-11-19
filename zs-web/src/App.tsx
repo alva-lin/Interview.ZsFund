@@ -1,8 +1,8 @@
-import { DatePicker, Select } from 'antd';
+import { Button, DatePicker, Select } from 'antd';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import ReactECharts from 'echarts-for-react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import './App.css';
 import { MarketEntity, RelativeReturn, RelativeReturnItem } from './model';
 
@@ -14,6 +14,7 @@ const DEFAULT_OPTION = {
   legend: {},
   tooltip: {},
   grid: { top: 8, right: 8, bottom: 24, left: 36 },
+  series: [] as any[],
   xAxis: { type: 'time', name: '时间' },
   yAxis: {
     type: 'value',
@@ -59,11 +60,10 @@ function App() {
 
   // 获取相对收益
   const [ relativeReturns, setRelativeReturns ] = useState<RelativeReturn[]>([]);
-  useEffect(() => {
+  const getRelativeReturns = useCallback(() => {
     if (!selectedForA.length || selectedForB === null || dates.length !== 2) {
       return;
     }
-
     axios.post<RelativeReturn[]>(`${baseUrl}/MarketEntity/relative-return`, {
       serialNumbers: selectedForA,
       baseSerialNumber: selectedForB,
@@ -73,18 +73,20 @@ function App() {
       setRelativeReturns(resp.data);
     })
   }, [ selectedForA, selectedForB, dates ]);
+  useEffect(() => {
+    getRelativeReturns();
+  }, [ getRelativeReturns ]);
 
+  // 更新图表
   const [ option, setOption ] = useState(DEFAULT_OPTION);
   useEffect(() => {
     if (relativeReturns.length === 0) {
       return;
     }
 
-    const stocks = relativeReturns.map(relativeReturn => allStocks.find(stock => stock.serialNumber === relativeReturn.entitySerialNumber));
-    const baseStock = allStocks.find(stock => stock.serialNumber === selectedForB);
-    console.log('stocks', relativeReturns, allStocks, stocks, baseStock)
+    const stocks = relativeReturns.map(relativeReturn => allStocks.find(stock => stock.serialNumber === relativeReturn.entitySerialNumber)!);
 
-    const dimensions = [ 'date', ...stocks.map(stock => stock?.name) ];
+    const dimensions = [ 'date', ...stocks.map(stock => stock.name) ];
     const data: (RelativeReturnItem & { entitySerialNumber: number })[] = [];
     relativeReturns.forEach(relativeReturn => {
       relativeReturn.data.forEach(item => {
@@ -115,13 +117,13 @@ function App() {
 
     const series = stocks.map(stock => ({
       type: 'line',
-      name: stock?.name,
+      id: stock.serialNumber!,
+      name: stock.name,
       encode: {
         x: 'date',
-        y: stock?.name,
+        y: stock.name,
       }
     }));
-
     const newOption = {
       ...option,
       dataset: {
@@ -130,7 +132,6 @@ function App() {
       },
       series,
     };
-    console.log(series, dimensions, mergedData)
     setOption(newOption);
 
   }, [ relativeReturns ]);
@@ -177,9 +178,15 @@ function App() {
                        dates && dates[0] && dates[1] && setDates([ dates[0].toDate(), dates[1].toDate() ]);
                      }}/>
       </div>
+      {/*刷新按钮*/}
+      <div>
+        <Button type={'default'} onClick={() => {
+          getRelativeReturns();
+        }}>刷新</Button>
+      </div>
       {/*展示图表*/}
       <div>
-        <ReactECharts option={option}/>
+        <ReactECharts option={option} notMerge={true}/>
       </div>
     </div>
   );
